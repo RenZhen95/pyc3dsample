@@ -158,7 +158,8 @@ class PyC3DSample:
     "workable" Python object.
     """
     def __init__(self, path):
-        self.ID          = path.name
+        print(str(path))
+        self.ID          = str(path)
         self.SampleDict  = c3d(str(path))
         self.FrameRate   = self.SampleDict['header']['points']['frame_rate']
         self.FirstFrame  = self.SampleDict['header']['points']['first_frame']
@@ -228,7 +229,7 @@ class PyC3DSample:
 
         for i in range(EventTimes.shape[1]):
             self.Events.append(
-                (EventLabel[i], float(EventTimes[1,i]))
+                (EventLabel[i], round(float(EventTimes[1,i]), 2))
             )
         self.Events.sort(key=lambda x:x[1])
 
@@ -255,14 +256,18 @@ class PyC3DSample:
          - Position : mm
          - Angle    : deg
         """
+        # To account for floating-point erros
+        _start = round(_start, 2)
+        _end   = round(_end, 2)
+
         TimeProgress = np.linspace(
-            _start, _end, int((_end-_start)/self.TimeStep + 1)
+            _start, _end, int(round((_end-_start), 2)/self.TimeStep + 1)
         ).round(2)
         FullProgress = self.get_TimeProgress(_variable)
 
         # Must account for floating-point errors!
-        _start_idx = np.where(FullProgress[:,0]==round(_start, 2))[0][0]
-        _end_idx   = np.where(FullProgress[:,0]==round(_end, 2))[0][0]
+        _start_idx = np.where(FullProgress[:,0]==_start)[0][0]
+        _end_idx   = np.where(FullProgress[:,0]==_end)[0][0]
 
         return np.array(
             [TimeProgress, FullProgress[_start_idx:_end_idx+1, 1]]
