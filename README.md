@@ -90,14 +90,13 @@ plt.show()
 
 To identify heel strikes.
 ```python
-rHeelStrike_Time = Test.get_HeelStrike('R')
+rHeelStrike_Time = Test.get_HeelStrike('R', _method='yHeelSnap')
+lHeelStrike_Time = Test.get_HeelStrike('L', _method='yHeelSnap')
 print(f"Right heel strike at : {rHeelStrike_Time}")
-
-lHeelStrike_Time = Test.get_HeelStrike('L')
 print(f"Left heel strike at  : {lHeelStrike_Time}")
 ```
 
 ```text
-Right heel strike at : 0.53
-Left heel strike at  : 1.11
+Right heel strike at : [0.6, 1.61]
+Left heel strike at  : [0.1, 1.09]
 ```
