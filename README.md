@@ -11,7 +11,7 @@ Initialize PyC3DSample object and get general information about C3D file by just
 ```python
 from pyc3dsample import PyC3DSample
 
-Test = PyC3DSample(<c3dfile>)
+Test = PyC3DSample(<path_to_c3dfile>)
 print(Test)
 ```
 
@@ -29,10 +29,10 @@ To get the progression of the left hip angles with respect to the X-axis.
 Test.get_TimeProgress("LHipAngles_X")
 ```
 
-To get events (e.g. left or right foot strike)
+To get events (e.g. left or right foot strike, or a general event added by the user)
 ```python
 # Get events -> List of (<label>, <time [s]>)
-Test.Events
+print(Test.Events)
 ```
 
 ```text
