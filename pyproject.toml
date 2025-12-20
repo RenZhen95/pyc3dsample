@@ -5,7 +5,7 @@ description = "Interface to easily deal with a C3D file, including some helpful 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "ezc3d>=1.6.3",
+    "ezc3d<1.6",
     "numpy>=2.3.5",
 ]
 
