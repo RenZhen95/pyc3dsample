@@ -1,6 +1,6 @@
 [project]
 name = "pyc3dsample"
-version = "0.1.0"
+version = "0.0.3"
 description = "Interface to easily deal with a C3D file, including some helpful methods for dealing with gait analysis (e.g. detecting heel strike)"
 readme = "README.md"
 requires-python = ">=3.13"
