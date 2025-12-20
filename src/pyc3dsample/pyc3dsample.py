@@ -2,6 +2,8 @@ import numpy as np
 from ezc3d import c3d
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+
 Angles = [
     "LHipAngles",
     "LKneeAngles",
@@ -158,7 +160,6 @@ class PyC3DSample:
     "workable" Python object.
     """
     def __init__(self, path):
-        print(str(path))
         self.ID          = str(path)
         self.SampleDict  = c3d(str(path))
         self.FrameRate   = self.SampleDict['header']['points']['frame_rate']
@@ -233,7 +234,7 @@ class PyC3DSample:
             )
         self.Events.sort(key=lambda x:x[1])
 
-    def get_TimeProgress(self, _variable):
+    def get_TimeProgress(self, _variable, plot=False):
         """
         Returns a np.array of the _variable's progress with respect to
         time.
@@ -244,6 +245,11 @@ class PyC3DSample:
         TimeProgress = np.linspace(
             StartTime, FinalTime, self.TotalFrames
         ).round(2)
+
+        if plot:
+            self.plot_Curve(
+                _variable, TimeProgress, self.__dict__[_variable], 'd'
+            )
 
         return np.array([TimeProgress, self.__dict__[_variable]]).T
 
@@ -273,7 +279,7 @@ class PyC3DSample:
             [TimeProgress, FullProgress[_start_idx:_end_idx+1, 1]]
         ).T
 
-    def get_TimeProgress1D(self, _variable):
+    def get_TimeProgress1D(self, _variable, plot=False):
         """
         Returns a np.array of the first numerical derivative of _variable.
         Computed using numpy.gradient, which computes the gradient using the
@@ -292,7 +298,134 @@ class PyC3DSample:
         ).round(2)
 
         TimeProgress1D = np.gradient(self.__dict__[_variable], self.TimeStep)
+
+        if plot:
+            self.plot_Curve(_variable, TimeProgress, TimeProgress1D, 'v')
+
         return np.array([TimeProgress, TimeProgress1D]).T
+
+    def get_TimeProgress2D(self, _variable, plot=False):
+        """
+        Returns a np.array of the second numerical derivative of _variable.
+        Computed using numpy.gradient, which computes the gradient using the
+        second order accurate central differences in the interior points,
+        and the first order accurate one-sides differences at the boundaries.
+
+        Units for
+         - Position : mm/s
+         - Angle    : deg/s
+        """
+        StartTime = (self.FirstFrame - 1) * self.TimeStep
+        FinalTime = (self.LastFrame - 1) * self.TimeStep
+
+        TimeProgress = np.linspace(
+            StartTime, FinalTime, self.TotalFrames
+        ).round(2)
+
+        TimeProgress1D = np.gradient(self.__dict__[_variable], self.TimeStep)
+        TimeProgress2D = np.gradient(TimeProgress1D, self.TimeStep)
+
+        if plot:
+            self.plot_Curve(_variable, TimeProgress, TimeProgress2D, 'a')
+            
+        return np.array([TimeProgress, TimeProgress2D]).T
+
+    def get_TimeProgress3D(self, _variable, plot=False):
+        """
+        Returns a np.array of the third numerical derivative of _variable.
+        Computed using numpy.gradient, which computes the gradient using the
+        second order accurate central differences in the interior points,
+        and the first order accurate one-sides differences at the boundaries.
+
+        Units for
+         - Position : mm/s
+         - Angle    : deg/s
+        """
+        StartTime = (self.FirstFrame - 1) * self.TimeStep
+        FinalTime = (self.LastFrame - 1) * self.TimeStep
+
+        TimeProgress = np.linspace(
+            StartTime, FinalTime, self.TotalFrames
+        ).round(2)
+
+        TimeProgress1D = np.gradient(self.__dict__[_variable], self.TimeStep)
+        TimeProgress2D = np.gradient(TimeProgress1D, self.TimeStep)
+        TimeProgress3D = np.gradient(TimeProgress2D, self.TimeStep)
+
+        if plot:
+            self.plot_Curve(_variable, TimeProgress, TimeProgress3D, '4')
+            
+        return np.array([TimeProgress, TimeProgress3D]).T
+
+    def get_TimeProgress4D(self, _variable, plot=False):
+        """
+        Returns a np.array of the fourth numerical derivative of _variable.
+        Computed using numpy.gradient, which computes the gradient using the
+        second order accurate central differences in the interior points,
+        and the first order accurate one-sides differences at the boundaries.
+
+        Units for
+         - Position : mm/s
+         - Angle    : deg/s
+        """
+        StartTime = (self.FirstFrame - 1) * self.TimeStep
+        FinalTime = (self.LastFrame - 1) * self.TimeStep
+
+        TimeProgress = np.linspace(
+            StartTime, FinalTime, self.TotalFrames
+        ).round(2)
+
+        TimeProgress1D = np.gradient(self.__dict__[_variable], self.TimeStep)
+        TimeProgress2D = np.gradient(TimeProgress1D, self.TimeStep)
+        TimeProgress3D = np.gradient(TimeProgress2D, self.TimeStep)
+        TimeProgress4D = np.gradient(TimeProgress3D, self.TimeStep)
+
+        if plot:
+            self.plot_Curve(_variable, TimeProgress, TimeProgress4D, '4')
+            
+        return np.array([TimeProgress, TimeProgress4D]).T
+
+    def plot_Curve(self, _variable, _time, _progress, _type):
+        fig, ax = plt.subplots(1, 1)
+
+        if _type == 'd':
+            if not _variable.split('_')[0] in Angles:
+                yLabel = r"Displacement $[mm / s]$"
+            else:
+                yLabel = r"Angle $[\circ]$"
+        elif _type == 'v':
+            if not _variable.split('_')[0] in Angles:
+                yLabel = r"Velocity $[mm / s]$"
+            else:
+                yLabel = r"Ang. Velocity $[\circ / s]$"
+
+        elif _type == 'a':
+            if not _variable.split('_')[0] in Angles:
+                yLabel = r"Acceleration $[mm / s^2]$"
+            else:
+                yLabel = r"Ang. Acceleration $[\circ / s^2]$"
+
+        elif _type == 'j':
+            if not _variable.split('_')[0] in Angles:
+                yLabel = r"Jerk $[mm / s^3]$"
+            else:
+                yLabel = r"Ang. Jerk $[\circ / s^3]$"
+
+        elif _type == 's':
+            if not _variable.split('_')[0] in Angles:
+                yLabel = r"Snap $[mm / s^4]$"
+            else:
+                yLabel = rf"Ang. Jerk $[\circ / s^4]$"
+
+        ax.plot(_time, _progress)
+        ax.set_xlabel(r"Time $[s]$")
+        ax.set_ylabel(yLabel)
+        ax.set_title(f"{_variable}", loc="left")
+        ax.axvline(x=0.53, linestyle='--')
+        ax.axvline(x=0.63, linestyle='--')
+        ax.axvline(x=1.62, linestyle='--')
+        ax.grid()
+        plt.tight_layout()
 
     def get_VelocitySignChange(self, _variable):
         """
@@ -313,6 +446,44 @@ class PyC3DSample:
 
         return signchanges
 
+    def get_AccelerationSignChange(self, _variable):
+        """
+        Returns a list of tuples (<time-step before>, <time-step after>),
+        containing the pair of time-steps, where the sign changes.
+        """
+        signchanges = []
+        acc = self.get_TimeProgress2D(_variable)
+
+        staggered_v2 = acc[:-1, 1] * acc[1:, 1]
+        # Negative elements indicate a sign change
+        # Example: If staggered_v2[1] < 0, that means a sign change occured
+        #          between acc[1] and acc[2]
+        signchange_indices = np.where(staggered_v2 < 0)
+
+        for i in signchange_indices[0]:
+            signchanges.append(acc[i:i+2,:])
+
+        return signchanges
+
+    def get_SnapSignChange(self, _variable):
+        """
+        Returns a list of tuples (<time-step before>, <time-step after>),
+        containing the pair of time-steps, where the sign changes.
+        """
+        signchanges = []
+        snap = self.get_TimeProgress4D(_variable)
+
+        staggered_v2 = snap[:-1, 1] * snap[1:, 1]
+        # Negative elements indicate a sign change
+        # Example: If staggered_v2[1] < 0, that means a sign change occured
+        #          between snap[1] and snap[2]
+        signchange_indices = np.where(staggered_v2 < 0)
+
+        for i in signchange_indices[0]:
+            signchanges.append(snap[i:i+2,:])
+
+        return signchanges
+
     def get_DisplacementHeelFromTrunk(self, _side, _forwardaxis):
         """
         Get absolute displacement of heel marker from sacrum marker.
@@ -327,7 +498,49 @@ class PyC3DSample:
 
         return absDistance
 
-    def get_HeelStrike(self, _side, _forwardaxis='Y'):
+    def get_TimeSteps_wSignChanges(
+            self, _signchanges, _heelsternum, neg_to_pos=True
+    ):
+        """
+        Functions takes two arrays:
+        1. Array with pair of elements that indicate where the sign changes
+           occurs
+        2. Array with distances of heel marker from the sternum marker
+
+        Function then
+        1. selects the pairs where sign changes in specified direction and
+        2. returns the selected pairs, where the heel markers is located in
+           front of the sternum marker
+        """
+        return_list = []
+        sel_pairs   = []
+        
+        if neg_to_pos:
+            sel_pairs = [
+                _pair for _pair in _signchanges if (
+                    (_pair[1,1] >= 0.0) and (_pair[0,1] < 0.0)
+                )
+            ]
+            selidx = 0
+        else:
+            sel_pairs = [
+                _pair for _pair in _signchanges if (
+                    (_pair[1,1] < 0.0) and (_pair[0,1] >= 0.0)
+                )
+            ]
+            selidx = 1
+    
+        # Add corresponding distance of heel from sternum
+        for _pair in sel_pairs:
+            return_list.append(
+                _heelsternum[
+                    np.where(_heelsternum[:,0]==round(_pair[selidx,0], 2)),:
+                ][0]
+            )
+
+        return return_list
+
+    def get_HeelStrike(self, _side, _forwardaxis='Y', _method="zHeelVelocity"):
         """
         Get the heel strike based on two conditions that must be fulfilled:
         1. Velocity of heel marker switches from negative to positive, in 
@@ -336,32 +549,60 @@ class PyC3DSample:
            direction
 
         Returns time-step where heel-strike occurs
+
+        Parameters
+        ----------
+        _side : {'R', 'L'}
+        Option of right or left heel marker
+
+        _forwardaxis = str (default: 'Y')
+        Option of anterior axis
+
+        _method : {'zHeelVelocity', 'yHeelAcceleration', 'yHeelSnap'}
+        Option of determining heel strikes. All the methods have a
+        common condition that the heel marker must be in front of the
+        sternum marker. The other conditions are as the following:
+        'zHeelVelocity'     : z-axis velocity of the heel marker changes from
+                              negative to positive
+        'yHeelAcceleration' : y-axis acceleration of the heel marker changes
+                              from negative to positive
+        'yHeelSnap'         : y-axis snap of the heel marker changes from
+                              positive to negative
         """
         possible_sides = ['R', 'L']
         if not _side in possible_sides:
             raise ValueError(f"Invalid input: {_side}, possible inputs: 'R' or 'L'")
-        signChanges = self.get_VelocitySignChange(f"{_side}HEE_Z")
-        absDistance = self.get_DisplacementHeelFromTrunk(_side, _forwardaxis)
 
-        # Identify velocity sign change from negative to positive
-        neg_to_pos = []
-        distance_heelstrn = []
-        for _pair in signChanges:
-            if ((_pair[1,1] >= 0.0) and (_pair[0,1] < 0.0)):
-                # Add instances of negative to positive velocity change
-                neg_to_pos.append(_pair)
+        heelstrn_distance = self.get_DisplacementHeelFromTrunk(_side, _forwardaxis)
 
-                # Add corresponding distance of heel from sternum
-                distance_heelstrn.append(
-                    absDistance[
-                        np.where(absDistance[:,0]==round(_pair[0,0], 2)),:
-                    ][0]
-                )
+        if _method == "zHeelVelocity":
+            signChanges = self.get_VelocitySignChange(f"{_side}HEE_Z")
+            neg_to_posInput = True
 
-        # Remove velocity changes, where heel is behind the sternum
-        distance_heelstrn = [i for i in distance_heelstrn if i[0,1] >= 0]
+        elif _method == 'yHeelAcceleration':
+            signChanges = self.get_AccelerationSignChange(
+                f"{_side}HEE_{_forwardaxis}"
+            )
+            neg_to_posInput = True
 
-        # Sort pairs by distance of heel from sternum marker in descending order
-        distance_heelstrn.sort(key=lambda x:x[0,1], reverse=True)
+        elif _method == 'yHeelSnap':
+            signChanges = self.get_SnapSignChange(
+                f"{_side}HEE_{_forwardaxis}"
+            )
+            neg_to_posInput = False
 
-        return round(distance_heelstrn[0][0,0], 2)
+        # Get time-steps with respective sign-changes
+        timesteps_wDisplacementHeelStrn = self.get_TimeSteps_wSignChanges(
+            signChanges, heelstrn_distance, neg_to_pos=neg_to_posInput
+        )
+
+        # Only retain time-steps, where heel is in front of the sternum
+        heelstrikes = [
+            i for i in timesteps_wDisplacementHeelStrn if i[0,1] >= 0
+        ]
+        heelstrikes_timesteps = [
+            round(float(pair[0,0]), 2) for pair in heelstrikes
+        ]
+        heelstrikes_timesteps.sort()
+
+        return heelstrikes_timesteps
