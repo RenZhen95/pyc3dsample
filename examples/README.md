@@ -26,4 +26,4 @@ get_HeelStrike('R', _forwardaxis='Y', _method="yHeelSnap")
 
 The implemented methods were validated using the C3D file in `data/testsample.c3d`.
 
-![Heel Detection Method Comparisons and Validation](examples/HeelStrikeDetectionMethods.png)
+![Heel Detection Method Comparisons and Validation](HeelStrikeDetectionMethods.png)
