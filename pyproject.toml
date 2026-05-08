@@ -1,6 +1,6 @@
 [project]
 name = "pyc3dsample"
-version = "0.0.4"
+version = "0.0.5"
 description = "Interface to easily deal with a C3D file, including some helpful methods for dealing with gait analysis (e.g. detecting heel strike)"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -9,6 +9,9 @@ dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.3.5",
 ]
+
+[project.urls]
+GitHub = "https://github.com/RenZhen95/pyc3dsample"
 
 [project.scripts]
 pyc3dsample = "pyc3dsample:main"
